@@ -2,10 +2,12 @@
 from __future__ import absolute_import
 
 import octoprint.plugin  # @UnresolvedImport
-from BaseHTTPServer import BaseHTTPRequestHandler,HTTPServer  # @UnresolvedImport
+import octoprint.settings  # @UnresolvedImport
+from http.server import HTTPServer, BaseHTTPRequestHandler
 import json
 import threading
 import time
+
 
 def AlertHandlerFactory(jamSentryInstance):
     class AlertHandler(BaseHTTPRequestHandler,object):
@@ -13,7 +15,7 @@ def AlertHandlerFactory(jamSentryInstance):
             self.jamSentryInstance=jamSentryInstance
             super(AlertHandler, self).__init__(*args, **kwargs)
             
-                #Handler for the GET requests
+        #Handler for the GET requests
         def do_GET(self):
             self.send_response(200)
             self.send_header('Content-type','text/html')
@@ -67,7 +69,8 @@ class JamSentryPlugin(octoprint.plugin.StartupPlugin,
     
 
     def get_assets(self):
-        return dict(js=["js/jamsentry.js"],css=["css/jamsentry.css"])
+        return dict(js=["js/jamsentry.js"],
+                    css=["css/jamsentry.css"])
     
 
     def get_settings_defaults(self):
@@ -80,7 +83,7 @@ class JamSentryPlugin(octoprint.plugin.StartupPlugin,
         )
 
     def get_template_configs(self):
-        return [dict(type="settings", custom_bindings=False)]
+        return [dict(type="settings", custom_bindings=True, template="jamsentry_settings.jinja2")]
 
     def jamMessageReceived(self,machine,extruder,password):
         if password==self.pswd:
@@ -114,14 +117,16 @@ class JamSentryPlugin(octoprint.plugin.StartupPlugin,
         octoprint.plugin.SettingsPlugin.on_settings_save(self, data)
 #        print('Data being updated: ipaddr: ' + str(self.ipaddr) + ', port: ' + str(self.port) + ', pswd: ' + str(self.pswd))
         self.stopWaitingForJamSentryAlarm()
-        self.jamsentryMontitorThread=threading.Thread(target=self.waitForJamSentryAlarm,name='Monitor JamSentry')
-        self.jamsentryMontitorThread.start()
+        self.jamsentryMonitorThread=threading.Thread(target=self.waitForJamSentryAlarm,name='Monitor JamSentry')
+        self.jamsentryMonitorThread.start()
         self._logger.info("Listening for JamSentry alerts on port " +str(self.port))
     
     def on_after_startup(self):
-        self.jamsentryMontitorThread=threading.Thread(target=self.waitForJamSentryAlarm,name='Monitor JamSentry')
-        self.jamsentryMontitorThread.start()
+        self.jamsentryMonitorThread=threading.Thread(target=self.waitForJamSentryAlarm,name='Monitor JamSentry')
+        self.jamsentryMonitorThread.start()
         self._logger.info("JamSentry thread started to listening for alerts on port " +str(self.port))
                 
 __plugin_name__ = "JamSentry"
+__plugin_version__ = "2.0.0"
+__plugin_pythoncompat__ = ">=3.7,<4"
 __plugin_implementation__ = JamSentryPlugin()
