@@ -13,7 +13,7 @@ except:
 
 ########################################################################################################################
 
-plugin_identifier = "JamSentry"
+plugin_identifier = "jamsentry"
 plugin_package = "octoprint_jamsentry"
 plugin_name = "OctoPrint-JamSentry"
 plugin_version = "2.0.1"
