@@ -16,7 +16,7 @@ except:
 plugin_identifier = "JamSentry"
 plugin_package = "octoprint_jamsentry"
 plugin_name = "OctoPrint-JamSentry"
-plugin_version = "2.0.0"
+plugin_version = "2.0.1"
 plugin_description = """Responds to filament jam alerts from JamSentry"""
 plugin_author = "Michael Ford"
 # Plugin originally written by: Stephen Hayes
